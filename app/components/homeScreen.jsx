@@ -6,7 +6,7 @@ export default function HomeScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.greeting}>Hello, {auth.currentUser?.email}</Text>
-            <Button title="Sign Out" onPress={signOut} />
+            
         </View>
     );
 }

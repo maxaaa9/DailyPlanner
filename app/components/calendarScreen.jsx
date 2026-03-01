@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 export default function CalendarScreen() {
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Calendar</Text>
+            <Text style={styles.title}>Scheduler</Text>
         </View>
     );
 }

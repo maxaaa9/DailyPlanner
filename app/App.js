@@ -1,4 +1,4 @@
-import { StyleSheet, View, ActivityIndicator, Text } from 'react-native';
+import { View, ActivityIndicator, Text } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -7,6 +7,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { auth } from './firebaseConfig';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import AuthScreen from './components/authScreen';
 import ProfileMenu from './components/profileMenu';
 import HomeScreen from './components/homeScreen';
@@ -18,17 +19,11 @@ const Tab = createMaterialTopTabNavigator();
 const TAB_ICONS = {
   Home: 'home-outline',
   Tasks: 'checkmark-circle-outline',
-  Calendar: 'calendar-outline',
+  Scheduler: 'calendar-outline',
 };
 
-const showSignOutConfirmation = () => {
-  Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-    { text: 'Cancel', style: 'cancel' },
-    { text: 'Sign Out', style: 'destructive', onPress: signOut },
-  ]);
-};
-
-export default function App() {
+function MainApp() {
+  const { colors } = useTheme();
   const [signedIn, setSignedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [currentTab, setCurrentTab] = useState('Home');
@@ -43,91 +38,71 @@ export default function App() {
 
   if (loading) {
     return (
-      <SafeAreaProvider>
-        <View style={styles.center}>
-          <ActivityIndicator size="large" />
-        </View>
-      </SafeAreaProvider>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
     );
   }
 
   if (!signedIn) {
-    return (
-      <SafeAreaProvider>
-        <AuthScreen onAuthSuccess={() => setSignedIn(true)} />
-      </SafeAreaProvider>
-    );
+    return <AuthScreen onAuthSuccess={() => setSignedIn(true)} />;
   }
 
   return (
+    <NavigationContainer>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.header }}>
+        <View style={[styles.header, { backgroundColor: colors.header, borderBottomColor: colors.border }]}>
+          <Text style={[styles.headerTitle, { color: colors.headerText }]}>{currentTab}</Text>
+          <ProfileMenu />
+        </View>
+        <Tab.Navigator
+          tabBarPosition="bottom"
+          screenListeners={{
+            focus: (e) => setCurrentTab(e.target?.split('-')[0] ?? 'Home'),
+          }}
+          screenOptions={({ route }) => ({
+            swipeEnabled: true,
+            tabBarIcon: ({ color }) => (
+              <Ionicons name={TAB_ICONS[route.name]} size={22} color={color} />
+            ),
+            tabBarShowIcon: true,
+            tabBarActiveTintColor: colors.tabActive,
+            tabBarInactiveTintColor: colors.tabInactive,
+            tabBarStyle: { backgroundColor: colors.tabBar },
+            tabBarIndicatorStyle: { height: 0 },
+          })}
+        >
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Tasks" component={TasksScreen} />
+          <Tab.Screen name="Scheduler" component={CalendarScreen} />
+        </Tab.Navigator>
+      </SafeAreaView>
+      <StatusBar style="light" />
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <SafeAreaView style={{ flex: 1 }}>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>{currentTab}</Text>
-            <ProfileMenu />
-          </View>
-          <Tab.Navigator
-            tabBarPosition="bottom"
-            screenListeners={{
-              focus: (e) => setCurrentTab(e.target?.split('-')[0] ?? 'Home'),
-            }}
-            screenOptions={({ route }) => ({
-              swipeEnabled: true,
-              tabBarIcon: ({ color }) => (
-                <Ionicons name={TAB_ICONS[route.name]} size={22} color={color} />
-              ),
-              tabBarShowIcon: true,
-              tabBarActiveTintColor: '#007AFF',
-              tabBarInactiveTintColor: '#8e8e93',
-              tabBarStyle: { backgroundColor: '#fff' },
-              tabBarIndicatorStyle: { height: 0 },
-            })}
-          >
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Tasks" component={TasksScreen} />
-            <Tab.Screen name="Calendar" component={CalendarScreen} />
-          </Tab.Navigator>
-        </SafeAreaView>
-      </NavigationContainer>
-      <StatusBar style="auto" />
+      <ThemeProvider>
+        <MainApp />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+const styles = {
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#000000',
     borderBottomWidth: 1,
-    borderBottomColor: '#ffffff',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#ffffff',
   },
-  profileCircle: {
-    width: 35,
-    height: 35,
-    borderRadius: 18, // Half of width/height makes it a perfect circle
-    backgroundColor: '#0047AB', // Changed from red to match the Blue in your logo
-    justifyContent: 'center',  // Centers icon vertically
-    alignItems: 'center',      // Centers icon horizontally
-    // Add a slight shadow for depth
-    elevation: 3, 
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-});
+};
