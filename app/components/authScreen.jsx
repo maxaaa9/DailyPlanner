@@ -1,4 +1,5 @@
 import { Button, StyleSheet, TextInput, View, KeyboardAvoidingView, Text, TouchableOpacity, Image } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useRef } from "react";
 import { signIn, createAccount } from "../utils/authenticator";
 
@@ -33,12 +34,7 @@ const AuthScreen = ({ onAuthSuccess }) => {
     };
 
     return (
-        <View style={styles.screen}>
-            {error !== '' && (
-                <View style={styles.errorBanner}>
-                    <Text style={styles.errorText}>{error}</Text>
-                </View>
-            )}
+        <SafeAreaView style={{ flex: 1 }}>
             <KeyboardAvoidingView behavior="padding" style={styles.keyboard}>
                 <View style={styles.container}>
                     <Image source={require('../../assets/dailyPlanner.jpg')} style={styles.wallpaper} resizeMode="cover" />
@@ -53,6 +49,11 @@ const AuthScreen = ({ onAuthSuccess }) => {
                         returnKeyType="next"
                         onSubmitEditing={() => passwordRef.current?.focus()}
                     />
+                    {error !== '' && (
+                        <View style={styles.errorBanner}>
+                            <Text style={styles.errorText}>{error}</Text>
+                        </View>
+                    )}
                     <TextInput
                         ref={passwordRef}
                         style={styles.input}
@@ -74,25 +75,18 @@ const AuthScreen = ({ onAuthSuccess }) => {
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>
-        </View>
+        </SafeAreaView>
     );
 };
 
 export default AuthScreen;
 
 const styles = StyleSheet.create({
-    screen: {
-        flex: 1,
-    },
     errorBanner: {
-        position: 'absolute',
-        top: 50,
-        left: 16,
-        right: 16,
+        width: '80%',
         backgroundColor: '#F44336',
         borderRadius: 8,
         padding: 12,
-        zIndex: 10,
     },
     errorText: {
         color: '#fff',
@@ -106,7 +100,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     container: {
-        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         gap: 12,
