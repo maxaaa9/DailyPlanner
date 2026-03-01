@@ -1,4 +1,4 @@
-import { TouchableOpacity, StyleSheet, Alert, ActionSheetIOS, Platform } from 'react-native';
+import { TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { signOut } from '../utils/authenticator';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,26 +11,17 @@ const showSignOutConfirmation = () => {
 };
 
 export default function ProfileMenu() {
-    const { isDark, toggleTheme } = useTheme();
+    const { isDark, toggleTheme, resetToSystem } = useTheme();
 
     const handleProfilePress = () => {
         const themeLabel = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-
-        if (Platform.OS === 'ios') {
-            ActionSheetIOS.showActionSheetWithOptions(
-                { options: ['Cancel', themeLabel, 'Sign Out'], destructiveButtonIndex: 2, cancelButtonIndex: 0, title: 'Account Options' },
-                (buttonIndex) => {
-                    if (buttonIndex === 1) toggleTheme();
-                    if (buttonIndex === 2) showSignOutConfirmation();
-                }
-            );
-        } else {
-            Alert.alert('Account Options', 'Choose an action', [
-                { text: themeLabel, onPress: toggleTheme },
+            Alert.alert('Settings', 'Choose an action', [
                 { text: 'Sign Out', style: 'destructive', onPress: showSignOutConfirmation },
-                { text: 'Cancel', style: 'cancel' },
-            ]);
-        }
+                { text: 'System Theme', onPress: resetToSystem },
+                { text: themeLabel, onPress: toggleTheme },
+            ],
+            { cancelable: true }
+          );
     };
 
     return (
