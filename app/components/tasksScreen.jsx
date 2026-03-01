@@ -1,9 +1,11 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import { triggerInternalNotification } from '../utils/internalNotification';
 
 export default function TasksScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Tasks</Text>
+            <Button title="Test Notifications" onPress={() => triggerInternalNotification("Reminder:P", "This is a test notification from the Tasks screen!")} />
         </View>
     );
 }

@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -21,10 +21,16 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.dailyplanner.finalexam"
+      "package": "com.dailyplanner"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/dailyPlanner.jpg"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        { "icon": "./assets/dailyPlanner.png", "color": "#0047AB" }
+      ]
+    ]
   }
 }
