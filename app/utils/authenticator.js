@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 
 /**
@@ -10,10 +10,30 @@ import { auth } from '../firebaseConfig';
 export async function signIn(email, password) {
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    console.log('Sign in successful');
     return true;
   } catch (error) {
     console.error('Wrong credentials, please try again!');
+    return false;
+  }
+}
+
+export async function createAccount(email, password) {
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    console.log('Account created successfully');
+    return true;
+  } catch (error) {
+    console.error('This email is already in use, please try another one!');
+    return false;
+  }
+}
+
+export async function signOut() {
+  try {
+    await firebaseSignOut(auth);
+    return true;
+  } catch (error) {
+    console.error('Sign out failed:', error.message);
     return false;
   }
 }

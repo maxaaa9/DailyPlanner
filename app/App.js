@@ -1,24 +1,41 @@
 import { StatusBar } from 'expo-status-bar';
-import { Button, StyleSheet, Text, View } from 'react-native';
-import { signIn } from './utils/authenticator';
-import { useState } from 'react';
+import { StyleSheet, Text, View, ActivityIndicator, Button } from 'react-native';
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebaseConfig';
+import AuthScreen from './components/authScreen';
+import { signOut } from './utils/authenticator';
 
 export default function App() {
   const [signedIn, setSignedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setSignedIn(!!user);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (!signedIn) {
+    return <AuthScreen onAuthSuccess={() => setSignedIn(true)} />;
+  }
 
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+      <Text>Hello! {auth.currentUser?.email}</Text>
+      <Text>Welcome! You are signed in.</Text>
+      <Button title="Sign Out" onPress={signOut} />
       <StatusBar style="auto" />
-      <View style={[styles.statusBadge, signedIn ? styles.statusOn : styles.statusOff]}>
-        <Text style={styles.statusText}>
-          {signedIn ? 'Signed In' : 'Signed Out'}
-        </Text>
-      </View>
-      <Button
-        onPress={() => signIn('maxaaa9@abv.bg', '1234567').then(result => setSignedIn(result))}
-        title="Sign In"
-      />
     </View>
   );
 }
