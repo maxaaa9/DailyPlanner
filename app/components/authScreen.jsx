@@ -19,6 +19,14 @@ const AuthScreen = ({ onAuthSuccess }) => {
 
     const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
+    const isValidPassword = (value) => {
+        if (value.length < 8) return 'Password must be at least 8 characters.';
+        if (!/[A-Z]/.test(value)) return 'Password must contain at least one uppercase letter.';
+        if (!/[a-z]/.test(value)) return 'Password must contain at least one lowercase letter.';
+        if (!/[0-9]/.test(value)) return 'Password must contain at least one number.';
+        return null;
+    };
+
     const handleSignIn = async () => {
         if (!isValidEmail(email)) return showError('Please enter a valid email address.');
         const success = await signIn(email, password);
@@ -28,6 +36,8 @@ const AuthScreen = ({ onAuthSuccess }) => {
 
     const handleRegister = async () => {
         if (!isValidEmail(email)) return showError('Please enter a valid email address.');
+        const passwordError = isValidPassword(password);
+        if (passwordError) return showError(passwordError);
         const success = await createAccount(email, password);
         if (success) onAuthSuccess();
         else showError('This email is already in use, please try another one.');
