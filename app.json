@@ -17,20 +17,25 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
+        "foregroundImage": "./assets/icon.png",
+        "backgroundImage": "./assets/icon.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.dailyplanner",
-      "permissions": ["CAMERA"]
+      "package": "com.dailyplanner.finalexam",
+      "permissions": [
+        "INTERNET",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA"
+      ],
     },
     "web": {
-      "favicon": "./assets/dailyPlanner.jpg"
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       [
         "expo-notifications",
-        { "icon": "./assets/dailyPlanner.png", "color": "#0047AB" }
+        { "icon": "./assets/icon.png", "color": "#0047AB" }
       ]
     ]
   }

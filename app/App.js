@@ -1,4 +1,4 @@
-import { View, ActivityIndicator, Text } from 'react-native';
+import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -92,7 +92,7 @@ export default function App() {
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -105,4 +105,4 @@ const styles = {
     fontSize: 20,
     fontWeight: 'bold',
   },
-};
+});
