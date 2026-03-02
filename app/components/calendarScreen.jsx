@@ -1,21 +1,14 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import DayListScreen from './scheduler/DayListScreen';
+import DayDetailScreen from './scheduler/DayDetailScreen';
+
+const Stack = createNativeStackNavigator();
 
 export default function CalendarScreen() {
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Scheduler</Text>
-        </View>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="DayList" component={DayListScreen} />
+            <Stack.Screen name="DayDetail" component={DayDetailScreen} />
+        </Stack.Navigator>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
-});

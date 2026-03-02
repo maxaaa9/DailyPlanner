@@ -1,4 +1,4 @@
-import { TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import { TouchableOpacity, StyleSheet, Alert, Image, Modal, View, Text, Switch } from 'react-native';
 import { signOut } from '../utils/authenticator';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,8 +16,9 @@ const showSignOutConfirmation = () => {
 };
 
 export default function ProfileMenu() {
-    const { isDark, toggleTheme, resetToSystem } = useTheme();
+    const { isDark, colors, toggleTheme, resetToSystem } = useTheme();
     const [profilePic, setProfilePic] = useState(null);
+    const [themeVisible, setThemeVisible] = useState(false);
 
     useEffect(() => {
         let firestoreUnsub = null;
@@ -66,31 +67,57 @@ export default function ProfileMenu() {
         }
     };
 
-    const handleThemePress = () => {
-        const themeLabel = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-        Alert.alert('Theme', 'Choose a theme', [
-            { text: themeLabel, onPress: toggleTheme },
-            { text: 'System Default', onPress: resetToSystem },
-            { text: 'Cancel', style: 'cancel' },
-        ]);
-    };
-
     const handleProfilePress = () => {
         Alert.alert('Settings', 'Choose an action', [
-            { text: 'Change Profile Picture', onPress: handleTakePhoto },
-            { text: 'Theme', onPress: handleThemePress },
             { text: 'Sign Out', style: 'destructive', onPress: showSignOutConfirmation },
-        ],
-        { cancelable: true });
+            { text: 'Change Profile Picture', onPress: handleTakePhoto },
+            { text: 'Theme', onPress: () => setThemeVisible(true) },
+        ], { cancelable: true });
     };
 
     return (
-        <TouchableOpacity style={styles.profileCircle} onPress={handleProfilePress}>
-            {profilePic
-                ? <Image source={{ uri: profilePic }} style={styles.profileImage} />
-                : <Ionicons name="person" size={20} color="white" />
-            }
-        </TouchableOpacity>
+        <>
+            <TouchableOpacity style={styles.profileCircle} onPress={handleProfilePress}>
+                {profilePic
+                    ? <Image source={{ uri: profilePic }} style={styles.profileImage} />
+                    : <Ionicons name="person" size={20} color="white" />
+                }
+            </TouchableOpacity>
+
+            <Modal
+                visible={themeVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setThemeVisible(false)}
+            >
+                <TouchableOpacity
+                    style={styles.overlay}
+                    onPress={() => setThemeVisible(false)}
+                    activeOpacity={1}
+                >
+                    <View style={[styles.themeBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                        <Text style={[styles.themeTitle, { color: colors.text }]}>Theme</Text>
+
+                        <View style={styles.themeRow}>
+                            <Text style={[styles.themeLabel, { color: colors.text }]}>Dark Mode</Text>
+                            <Switch
+                                value={isDark}
+                                onValueChange={toggleTheme}
+                                trackColor={{ false: colors.border, true: colors.primary }}
+                                thumbColor="white"
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            onPress={() => { resetToSystem(); setThemeVisible(false); }}
+                            style={[styles.systemBtn, { borderColor: colors.border }]}
+                        >
+                            <Text style={{ color: colors.primary, fontSize: 14 }}>Use System Default</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+        </>
     );
 }
 
@@ -111,5 +138,31 @@ const styles = StyleSheet.create({
         width: 35,
         height: 35,
         borderRadius: 18,
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    themeBox: {
+        width: 280,
+        borderRadius: 16,
+        borderWidth: 1,
+        padding: 20,
+        gap: 16,
+    },
+    themeTitle: { fontSize: 17, fontWeight: 'bold' },
+    themeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    themeLabel: { fontSize: 15 },
+    systemBtn: {
+        alignItems: 'center',
+        paddingVertical: 10,
+        borderRadius: 8,
+        borderWidth: 1,
     },
 });
