@@ -4,7 +4,8 @@ import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth, firestore } from '../firebaseConfig';
 
 const showSignOutConfirmation = () => {
@@ -19,11 +20,15 @@ export default function ProfileMenu() {
     const [profilePic, setProfilePic] = useState(null);
 
     useEffect(() => {
-        const user = auth.currentUser;
-        if (!user) return;
-        getDoc(doc(firestore, 'users', user.uid)).then(snapshot => {
-            if (snapshot.exists()) setProfilePic(snapshot.data()?.profilePicture ?? null);
+        let firestoreUnsub = null;
+        const authUnsub = onAuthStateChanged(auth, user => {
+            if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
+            if (!user) { setProfilePic(null); return; }
+            firestoreUnsub = onSnapshot(doc(firestore, 'users', user.uid), snapshot => {
+                setProfilePic(snapshot.data()?.profilePicture ?? null);
+            });
         });
+        return () => { authUnsub(); if (firestoreUnsub) firestoreUnsub(); };
     }, []);
 
     const handleTakePhoto = async () => {
@@ -35,18 +40,26 @@ export default function ProfileMenu() {
         const result = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
             aspect: [1, 1],
-            quality: 0.2,
+            quality: 0.1,
             base64: true,
         });
         if (result.canceled) return;
 
         const { base64 } = result.assets[0];
+        if (!base64) {
+            Alert.alert('Error', 'Could not read image data. Please try again.');
+            return;
+        }
+
         const dataUri = `data:image/jpeg;base64,${base64}`;
         const user = auth.currentUser;
+        if (!user) {
+            Alert.alert('Error', 'Not signed in. Please restart the app.');
+            return;
+        }
 
         try {
             await setDoc(doc(firestore, 'users', user.uid), { profilePicture: dataUri }, { merge: true });
-            setProfilePic(dataUri);
         } catch (e) {
             console.error('Profile picture save error:', e);
             Alert.alert('Save failed', e?.message ?? 'Could not save profile picture.');
