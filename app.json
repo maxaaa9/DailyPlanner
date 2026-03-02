@@ -21,7 +21,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.dailyplanner"
+      "package": "com.dailyplanner",
+      "permissions": ["CAMERA"]
     },
     "web": {
       "favicon": "./assets/dailyPlanner.jpg"

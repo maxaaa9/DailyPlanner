@@ -1,7 +1,11 @@
-import { TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { signOut } from '../utils/authenticator';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { useState, useEffect } from 'react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, firestore } from '../firebaseConfig';
 
 const showSignOutConfirmation = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -12,21 +16,67 @@ const showSignOutConfirmation = () => {
 
 export default function ProfileMenu() {
     const { isDark, toggleTheme, resetToSystem } = useTheme();
+    const [profilePic, setProfilePic] = useState(null);
+
+    useEffect(() => {
+        const user = auth.currentUser;
+        if (!user) return;
+        getDoc(doc(firestore, 'users', user.uid)).then(snapshot => {
+            if (snapshot.exists()) setProfilePic(snapshot.data()?.profilePicture ?? null);
+        });
+    }, []);
+
+    const handleTakePhoto = async () => {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission denied', 'Camera access is required to set a profile picture.');
+            return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.2,
+            base64: true,
+        });
+        if (result.canceled) return;
+
+        const { base64 } = result.assets[0];
+        const dataUri = `data:image/jpeg;base64,${base64}`;
+        const user = auth.currentUser;
+
+        try {
+            await setDoc(doc(firestore, 'users', user.uid), { profilePicture: dataUri }, { merge: true });
+            setProfilePic(dataUri);
+        } catch (e) {
+            console.error('Profile picture save error:', e);
+            Alert.alert('Save failed', e?.message ?? 'Could not save profile picture.');
+        }
+    };
+
+    const handleThemePress = () => {
+        const themeLabel = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        Alert.alert('Theme', 'Choose a theme', [
+            { text: themeLabel, onPress: toggleTheme },
+            { text: 'System Default', onPress: resetToSystem },
+            { text: 'Cancel', style: 'cancel' },
+        ]);
+    };
 
     const handleProfilePress = () => {
-        const themeLabel = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-            Alert.alert('Settings', 'Choose an action', [
-                { text: 'Sign Out', style: 'destructive', onPress: showSignOutConfirmation },
-                { text: 'System Theme', onPress: resetToSystem },
-                { text: themeLabel, onPress: toggleTheme },
-            ],
-            { cancelable: true }
-          );
+        Alert.alert('Settings', 'Choose an action', [
+            { text: 'Change Profile Picture', onPress: handleTakePhoto },
+            { text: 'Theme', onPress: handleThemePress },
+            { text: 'Sign Out', style: 'destructive', onPress: showSignOutConfirmation },
+        ],
+        { cancelable: true });
     };
 
     return (
         <TouchableOpacity style={styles.profileCircle} onPress={handleProfilePress}>
-            <Ionicons name="person" size={20} color="white" />
+            {profilePic
+                ? <Image source={{ uri: profilePic }} style={styles.profileImage} />
+                : <Ionicons name="person" size={20} color="white" />
+            }
         </TouchableOpacity>
     );
 }
@@ -42,5 +92,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 3,
+        overflow: 'hidden',
+    },
+    profileImage: {
+        width: 35,
+        height: 35,
+        borderRadius: 18,
     },
 });
