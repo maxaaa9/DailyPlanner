@@ -28,6 +28,7 @@ Functional guide:
     -   Application will request permissions for native functionality, Camera, Location and Notifications.
     -   Scheduler tab is showing you every day of the week, when you click on the following day, you can plan your daily tasks, this tasks are connected with the local         notification and will remind you every minute untill you are not entered the app and mark this task as started with the following tick in Tasks tab(once you mark this task cannot be removed).
     -   Scheduler tasks are refreshing to all devices automaticaly, also you can refresh them manually by slide from top to bottom and hold for a second.
+    -   You can update your tasks by holding on them at the scheduler tab (not in Task tab).
     -   Removing of any task from your scheduler is possible only from the owner of the device, it will require fingerprint, soo no one can delete your reminders by mistake.
     -   From the profile picture you can manage your application appearence, and your profile picture (This picture is saved at your account and is shared to all connected devices).
     -   In the Home tab you can check your daily tasks, how many of them are completed, and how many is your daily free time between the tasks. (In future will be added sleep time which will not be included in your free time counter). At the bottom is added your location the idea of this is to marked you the nearest fitness center (will be added in future.)
