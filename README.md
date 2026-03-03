@@ -46,7 +46,7 @@ Setup Requirements
 
 -   Real-time Database: Powered by Firebase Firestore. Your data stays synced across multiple devices instantly.
 
--   Cloud Profile: Your profile picture and appearance settings are saved to your account and shared across all connected devices.
+-   Cloud Profile: Your profile picture and appearance settings are saved to your account and shared across all connected devices. (Note: during the tests with new high quality front cameras, it is possible too heavy images to not be updated at your profile picture, because firebase can not save data with size, more than 1MB, method of profile pictures set will be improved in next versions!)
 
 -   Manual Sync: While auto-sync is active, you can manually refresh data using the Pull-to-Refresh gesture (swipe down and hold).
 
