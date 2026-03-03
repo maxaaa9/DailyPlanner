@@ -7,10 +7,11 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, getDocsFromServer } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useTheme } from '../../context/ThemeContext';
 import { auth, firestore } from '../../firebaseConfig';
-import { scheduleTaskNotification, cancelTaskNotification } from '../../utils/internalNotification';
+import { scheduleTaskNotification, cancelTaskNotification, cancelNotificationIds } from '../../utils/internalNotification';
 
 const DAY_FULL = {
     Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
@@ -180,6 +181,33 @@ export default function DayDetailScreen({ route, navigation }) {
             {
                 text: 'Delete', style: 'destructive', onPress: async () => {
                     await cancelTaskNotification(task.notificationId);
+
+                    try {
+                        const raw = await AsyncStorage.getItem('activeNotifIds_v2');
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            const ids = parsed.map?.[task.id];
+                            if (ids?.length) {
+                                await cancelNotificationIds(ids);
+                                delete parsed.map[task.id];
+                                await AsyncStorage.setItem('activeNotifIds_v2', JSON.stringify(parsed));
+                            }
+                        }
+                    } catch {}
+
+                    try {
+                        const raw = await AsyncStorage.getItem('todayStartNotifIds_v2');
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            const id = parsed.map?.[task.id];
+                            if (id) {
+                                await cancelNotificationIds([id]);
+                                delete parsed.map[task.id];
+                                await AsyncStorage.setItem('todayStartNotifIds_v2', JSON.stringify(parsed));
+                            }
+                        }
+                    } catch {}
+
                     await deleteDoc(doc(firestore, 'users', userId, 'scheduleTasks', task.id));
                 },
             },
@@ -262,6 +290,7 @@ export default function DayDetailScreen({ route, navigation }) {
                                 value={startDate}
                                 mode="time"
                                 is24Hour={true}
+                                display="spinner"
                                 onChange={onStartTimeChange}
                             />
                         )}
@@ -280,6 +309,7 @@ export default function DayDetailScreen({ route, navigation }) {
                                 value={endDate}
                                 mode="time"
                                 is24Hour={true}
+                                display="spinner"
                                 onChange={onEndTimeChange}
                             />
                         )}
