@@ -23,38 +23,42 @@ Setup Requirements
         - If you have an issues with the SDK location, open terminal as administrator and run -> [System.Environment]::SetEnvironmentVariable("ANDROID_HOME",                      "C:\Users\INSERT_YOU_USER_HERE\AppData\Local\Android\Sdk", "User").
 
 📅 Daily Planner – Functional Guide
+
 🔐 Authentication & Security
-Smart Login: Connect via email and password.
 
-Note: Password recovery is currently Coming Soon.
+-   Smart Login: Connect via email and password.
 
-Requirement: Use a valid email address and a strong password for better security.
+-   Note: Password recovery is currently Coming Soon.
 
-Privacy First: Deleting tasks requires Fingerprint Authentication, ensuring your reminders are safe from accidental removal by others.
+-   Requirement: Use a valid email address and a strong password for better security.
 
-☁️ Data & Sync
-Real-time Database: Powered by Firebase Firestore. Your data stays synced across multiple devices instantly.
+-   Privacy First: Deleting tasks requires Fingerprint Authentication, ensuring your reminders are safe from accidental removal by others.
 
-Cloud Profile: Your profile picture and appearance settings are saved to your account and shared across all connected devices.
+☁️ Data & Sync 
 
-Manual Sync: While auto-sync is active, you can manually refresh data using the Pull-to-Refresh gesture (swipe down and hold).
+-   Real-time Database: Powered by Firebase Firestore. Your data stays synced across multiple devices instantly.
+
+-   Cloud Profile: Your profile picture and appearance settings are saved to your account and shared across all connected devices.
+
+-   Manual Sync: While auto-sync is active, you can manually refresh data using the Pull-to-Refresh gesture (swipe down and hold).
 
 🛠 Core Functionality
-Permissions: The app will request access to Camera, Location, and Notifications for full native functionality.
 
-Advanced Scheduler:
+-   Permissions: The app will request access to Camera, Location, and Notifications for full native functionality.
 
-Plan tasks for any day of the week.
+-   Advanced Scheduler:
 
-Persistent Reminders: Local notifications will remind you every minute until you mark the task as "Started" in the Tasks tab.
+-   Plan tasks for any day of the week.
 
-Task Management: Update tasks by long-pressing them in the Scheduler tab.
+-   Persistent Reminders: Local notifications will remind you every minute until you mark the task as "Started" in the Tasks tab.
 
-Note: Once a task is marked with a tick in the Tasks tab, it is locked and cannot be removed.
+-   Task Management: Update tasks by long-pressing them in the Scheduler tab.
+
+-   Note: Once a task is marked with a tick in the Tasks tab, it is locked and cannot be removed.
 
 🏠 Home & Analytics
-Progress Tracking: View completed tasks and calculate your remaining Free Time between scheduled events.
+-   Progress Tracking: View completed tasks and calculate your remaining Free Time between scheduled events.
 
-Location Services: Displays your current location to eventually suggest the nearest fitness centers (Coming Soon).
+-   Location Services: Displays your current location to eventually suggest the nearest fitness centers (Coming Soon).
 
-Future Updates: Integration of "Sleep Time" to provide more accurate free-time calculations.
+-   Future Updates: Integration of "Sleep Time" to provide more accurate free-time calculations.
