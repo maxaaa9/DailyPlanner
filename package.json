@@ -10,7 +10,7 @@
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
     "web": "npx expo start --web",
-    "build:apk": "node -e \"require('fs').mkdirSync('android/app/src/main/assets', {recursive: true})\" && npx expo export:embed --platform android --dev false --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res && cd android && gradlew assembleDebug"
+    "build:apk": "npx expo prebuild --platform android --no-install && node scripts/patchAndroid.js && node -e \"require('fs').mkdirSync('android/app/src/main/assets', {recursive: true})\" && npx expo export:embed --platform android --dev false --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res && cd android && gradlew assembleDebug"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

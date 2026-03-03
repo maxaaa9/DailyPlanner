@@ -22,12 +22,17 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "com.dailyplanner.finalexam",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCfhhfp8XnfpaR7xlflV9iHrkKVpP8EJTI"
+        }
+      },
       "permissions": [
         "INTERNET",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "CAMERA"
-      ],
+      ]
     },
     "web": {
       "favicon": "./assets/icon.png"
@@ -36,6 +41,10 @@
       [
         "expo-notifications",
         { "icon": "./assets/icon.png", "color": "#0047AB" }
+      ],
+      [
+        "expo-image-picker",
+        { "cameraPermission": "Allow DailyPlanner to access your camera for profile pictures." }
       ]
     ]
   }
