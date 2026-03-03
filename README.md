@@ -1,3 +1,5 @@
+Download the .apk installation from here -> <a href="https://github.com/maxaaa9/DailyPlanner/releases/tag/Release">Click here!</a>
+
 Quick Overview
     We all know that when the new year is started we always have a plans for us, for example we always say:
         - This year i must reduce my weight and start to live more healthy and etc.
