@@ -314,15 +314,17 @@ export default function DayDetailScreen({ route, navigation }) {
                             />
                         )}
 
-                        <View style={styles.switchRow}>
-                            <Text style={[styles.switchLabel, { color: colors.text }]}>Enable notification</Text>
-                            <Switch
-                                value={notifyEnabled}
-                                onValueChange={setNotifyEnabled}
-                                trackColor={{ false: colors.border, true: colors.primary }}
-                                thumbColor="white"
-                            />
-                        </View>
+                        {!editingTask && (
+                            <View style={styles.switchRow}>
+                                <Text style={[styles.switchLabel, { color: colors.text }]}>Enable notification</Text>
+                                <Switch
+                                    value={notifyEnabled}
+                                    onValueChange={setNotifyEnabled}
+                                    trackColor={{ false: colors.border, true: colors.primary }}
+                                    thumbColor="white"
+                                />
+                            </View>
+                        )}
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity

@@ -11,7 +11,12 @@ Setup Requirements
 
         note: Using expo, local notifications will not worked!
 
-    Out of the sandbox(Android requirements Local Development): npx expo run:android
+    Out of the sandbox(Android requirements Local Development): 
+
+        For connected device with USB local run: npx expo run:android
+
+        For building a .apk: npm run build:apk
+
         - Node.js -> 22.x+ (LTS) -> https://nodejs.org/en/download
         - Java version: 17 (latest version is not working properly with the native) -> https://www.oracle.com/java/technologies/javase/jdk17-0-13-later-archive-downloads.html
         - Android studio -> https://developer.android.com/studio
@@ -21,6 +26,7 @@ Setup Requirements
         - Device must be set in development mode -> https://www.youtube.com/shorts/Nr0aJojqSJQ
         - Wireguard can lead to issues with the run, deactivate it.
         - If you have an issues with the SDK location, open terminal as administrator and run -> [System.Environment]::SetEnvironmentVariable("ANDROID_HOME",                      "C:\Users\INSERT_YOU_USER_HERE\AppData\Local\Android\Sdk", "User").
+        - If you have fatal error, you must insert the API_GOOGLE_KEY for locations api at \android\app\src\main\AndroidManifest.xml set android:value="AIzaSyCfhhfp8XnfpaR7xlflV9iHrkKVpP8EJTI"/>
 
 📅 Daily Planner – Functional Guide
 
