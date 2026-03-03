@@ -26,7 +26,7 @@ Setup Requirements
         - Device must be set in development mode -> https://www.youtube.com/shorts/Nr0aJojqSJQ
         - Wireguard can lead to issues with the run, deactivate it.
         - If you have an issues with the SDK location, open terminal as administrator and run -> [System.Environment]::SetEnvironmentVariable("ANDROID_HOME",                      "C:\Users\INSERT_YOU_USER_HERE\AppData\Local\Android\Sdk", "User").
-        - If you have fatal error, you must insert the API_GOOGLE_KEY for locations api at \android\app\src\main\AndroidManifest.xml set android:value="AIzaSyCfhhfp8XnfpaR7xlflV9iHrkKVpP8EJTI"/>
+        - If you have fatal error, you must insert the API_GOOGLE_KEY for locations api at \android\app\src\main\AndroidManifest.xml set android:value="AIzaSyCfhhfp8XnfpaR7xlflV9iHrkKVpP8EJTI"/>. If you cant set Android manifest, replace it with the ready one from folder scripts!
 
 📅 Daily Planner – Functional Guide
 
