@@ -22,13 +22,39 @@ Setup Requirements
         - Wireguard can lead to issues with the run, deactivate it.
         - If you have an issues with the SDK location, open terminal as administrator and run -> [System.Environment]::SetEnvironmentVariable("ANDROID_HOME",                      "C:\Users\INSERT_YOU_USER_HERE\AppData\Local\Android\Sdk", "User").
 
-Functional guide:
-    -   Connection can be done with email and password (forbidden password can not be restored: Comming soon), only real email address and strong password will pass.
-    -   Every account is working with realtime database (Firestore), with your account you can use multiple devices.
-    -   Application will request permissions for native functionality, Camera, Location and Notifications.
-    -   Scheduler tab is showing you every day of the week, when you click on the following day, you can plan your daily tasks, this tasks are connected with the local         notification and will remind you every minute untill you are not entered the app and mark this task as started with the following tick in Tasks tab(once you mark this task cannot be removed).
-    -   Scheduler tasks are refreshing to all devices automaticaly, also you can refresh them manually by slide from top to bottom and hold for a second.
-    -   You can update your tasks by holding on them at the scheduler tab (not in Task tab).
-    -   Removing of any task from your scheduler is possible only from the owner of the device, it will require fingerprint, soo no one can delete your reminders by mistake.
-    -   From the profile picture you can manage your application appearence, and your profile picture (This picture is saved at your account and is shared to all connected devices).
-    -   In the Home tab you can check your daily tasks, how many of them are completed, and how many is your daily free time between the tasks. (In future will be added sleep time which will not be included in your free time counter). At the bottom is added your location the idea of this is to marked you the nearest fitness center (will be added in future.)
+📅 Daily Planner – Functional Guide
+🔐 Authentication & Security
+Smart Login: Connect via email and password.
+
+Note: Password recovery is currently Coming Soon.
+
+Requirement: Use a valid email address and a strong password for better security.
+
+Privacy First: Deleting tasks requires Fingerprint Authentication, ensuring your reminders are safe from accidental removal by others.
+
+☁️ Data & Sync
+Real-time Database: Powered by Firebase Firestore. Your data stays synced across multiple devices instantly.
+
+Cloud Profile: Your profile picture and appearance settings are saved to your account and shared across all connected devices.
+
+Manual Sync: While auto-sync is active, you can manually refresh data using the Pull-to-Refresh gesture (swipe down and hold).
+
+🛠 Core Functionality
+Permissions: The app will request access to Camera, Location, and Notifications for full native functionality.
+
+Advanced Scheduler:
+
+Plan tasks for any day of the week.
+
+Persistent Reminders: Local notifications will remind you every minute until you mark the task as "Started" in the Tasks tab.
+
+Task Management: Update tasks by long-pressing them in the Scheduler tab.
+
+Note: Once a task is marked with a tick in the Tasks tab, it is locked and cannot be removed.
+
+🏠 Home & Analytics
+Progress Tracking: View completed tasks and calculate your remaining Free Time between scheduled events.
+
+Location Services: Displays your current location to eventually suggest the nearest fitness centers (Coming Soon).
+
+Future Updates: Integration of "Sleep Time" to provide more accurate free-time calculations.
