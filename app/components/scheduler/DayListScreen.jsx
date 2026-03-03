@@ -95,6 +95,9 @@ const styles = StyleSheet.create({
         padding: 16,
         borderBottomWidth: 1,
         gap: 14,
+        marginHorizontal: 12,
+        borderRadius: 8,
+        marginVertical: 4,
     },
     dayIndicator: {
         width: 42,

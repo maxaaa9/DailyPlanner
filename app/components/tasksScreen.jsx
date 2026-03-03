@@ -28,7 +28,9 @@ export default function TasksScreen() {
     const [tasks, setTasks] = useState([]);
     const [doneTasks, setDoneTasks] = useState(new Set());
     const activeNotifIdsRef = useRef({});
+    const todayStartNotifIdsRef = useRef({});
     const scheduledRef = useRef(new Set());
+    const doneRef = useRef(new Set());
     const todayName = DAYS[new Date().getDay()];
     const today = getTodayStr();
 
@@ -41,7 +43,10 @@ export default function TasksScreen() {
                     if (parsed.date === today) {
                         const ids = new Set(parsed.ids);
                         setDoneTasks(ids);
-                        ids.forEach(id => scheduledRef.current.add(id));
+                        ids.forEach(id => {
+                            scheduledRef.current.add(id);
+                            doneRef.current.add(id);
+                        });
                     }
                 }
                 const raw2 = await AsyncStorage.getItem('activeNotifIds_v2');
@@ -50,6 +55,13 @@ export default function TasksScreen() {
                     if (parsed2.date === today) {
                         activeNotifIdsRef.current = parsed2.map ?? {};
                         Object.keys(parsed2.map ?? {}).forEach(id => scheduledRef.current.add(id));
+                    }
+                }
+                const raw3 = await AsyncStorage.getItem('todayStartNotifIds_v2');
+                if (raw3) {
+                    const parsed3 = JSON.parse(raw3);
+                    if (parsed3.date === today) {
+                        todayStartNotifIdsRef.current = parsed3.map ?? {};
                     }
                 }
             } catch {}
@@ -70,7 +82,14 @@ export default function TasksScreen() {
                 });
                 todayTasks.sort((a, b) => a.startTime.localeCompare(b.startTime));
                 setTasks(todayTasks);
-                scheduleTodayTaskNotifications(todayTasks.filter(t => t.notificationsEnabled !== false));
+                scheduleTodayTaskNotifications(todayTasks.filter(t => t.notificationsEnabled !== false)).then(idMap => {
+                    if (!idMap || !Object.keys(idMap).length) return;
+                    todayStartNotifIdsRef.current = { ...todayStartNotifIdsRef.current, ...idMap };
+                    AsyncStorage.setItem('todayStartNotifIds_v2', JSON.stringify({
+                        date: today,
+                        map: todayStartNotifIdsRef.current,
+                    })).catch(() => {});
+                });
             });
         });
         return () => { authUnsub(); if (firestoreUnsub) firestoreUnsub(); };
@@ -87,13 +106,17 @@ export default function TasksScreen() {
                 if (task.notificationsEnabled === false) continue;
                 const ids = await scheduleActiveWindowNotifications(task, today);
                 if (ids.length > 0) {
-                    activeNotifIdsRef.current[task.id] = ids;
-                    try {
-                        await AsyncStorage.setItem('activeNotifIds_v2', JSON.stringify({
-                            date: today,
-                            map: activeNotifIdsRef.current,
-                        }));
-                    } catch {}
+                    if (doneRef.current.has(task.id)) {
+                        await cancelNotificationIds(ids);
+                    } else {
+                        activeNotifIdsRef.current[task.id] = ids;
+                        try {
+                            await AsyncStorage.setItem('activeNotifIds_v2', JSON.stringify({
+                                date: today,
+                                map: activeNotifIdsRef.current,
+                            }));
+                        } catch {}
+                    }
                 }
             }
         })();
@@ -102,6 +125,7 @@ export default function TasksScreen() {
     const handleTick = async (task) => {
         const newDone = new Set(doneTasks);
         newDone.add(task.id);
+        doneRef.current.add(task.id);
         setDoneTasks(newDone);
         try {
             await AsyncStorage.setItem('doneTasks_v2', JSON.stringify({ date: today, ids: [...newDone] }));
@@ -115,6 +139,18 @@ export default function TasksScreen() {
                 await AsyncStorage.setItem('activeNotifIds_v2', JSON.stringify({
                     date: today,
                     map: activeNotifIdsRef.current,
+                }));
+            } catch {}
+        }
+
+        const startId = todayStartNotifIdsRef.current[task.id];
+        if (startId) {
+            await cancelNotificationIds([startId]);
+            delete todayStartNotifIdsRef.current[task.id];
+            try {
+                await AsyncStorage.setItem('todayStartNotifIds_v2', JSON.stringify({
+                    date: today,
+                    map: todayStartNotifIdsRef.current,
                 }));
             } catch {}
         }
