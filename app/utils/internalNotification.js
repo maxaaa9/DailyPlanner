@@ -91,9 +91,10 @@ const scheduledTodayIds = new Set();
 
 export const scheduleTodayTaskNotifications = async (tasks) => {
   const { status } = await Notifications.requestPermissionsAsync();
-  if (status !== 'granted') return;
+  if (status !== 'granted') return {};
 
   const now = new Date();
+  const idMap = {};
   for (const task of tasks) {
     if (scheduledTodayIds.has(task.id)) continue;
     scheduledTodayIds.add(task.id);
@@ -102,16 +103,20 @@ export const scheduleTodayTaskNotifications = async (tasks) => {
     const triggerDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0);
 
     if (triggerDate > now) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: task.title,
-          body: `Starting now: ${task.startTime} – ${task.endTime}`,
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: triggerDate,
-        },
-      });
+      try {
+        const id = await Notifications.scheduleNotificationAsync({
+          content: {
+            title: task.title,
+            body: `Starting now: ${task.startTime} – ${task.endTime}`,
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: triggerDate,
+          },
+        });
+        idMap[task.id] = id;
+      } catch {}
     }
   }
+  return idMap;
 };

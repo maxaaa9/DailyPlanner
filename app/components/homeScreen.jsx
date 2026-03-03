@@ -285,4 +285,6 @@ const styles = StyleSheet.create({
     map: { flex: 1 },
     mapPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8 },
     mapPlaceholderText: { fontSize: 13 },
+    nearestBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
+    nearestBadgeText: { color: 'white', fontSize: 10, fontWeight: 'bold' },
 });
