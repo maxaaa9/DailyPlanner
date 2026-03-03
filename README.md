@@ -11,11 +11,11 @@ Setup Requirements
 
         note: Using expo, local notifications will not worked!
 
-    Out of the sandbox(Android requirements Local Development): 
+    Out of the sandbox(Android requirements Local Development):
 
-        For connected device with USB local run: npx expo run:android
-
-        For building a .apk: npm run build:apk
+        1. Install dependencies: npm install
+        2. For connected device with USB local run: npx expo run:android
+        3. For building a .apk: npm run build:apk
 
         - Node.js -> 22.x+ (LTS) -> https://nodejs.org/en/download
         - Java version: 17 (latest version is not working properly with the native) -> https://www.oracle.com/java/technologies/javase/jdk17-0-13-later-archive-downloads.html

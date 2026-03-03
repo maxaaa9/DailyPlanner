@@ -1,6 +1,6 @@
 import {
     View, Text, FlatList, TouchableOpacity, TextInput, Switch,
-    Modal, StyleSheet, Alert, KeyboardAvoidingView, RefreshControl,
+    Modal, StyleSheet, Alert, KeyboardAvoidingView, RefreshControl, ActivityIndicator,
 } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -38,6 +38,8 @@ export default function DayDetailScreen({ route, navigation }) {
     const { colors } = useTheme();
     const [tasks, setTasks] = useState([]);
     const [userId, setUserId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
@@ -91,16 +93,25 @@ export default function DayDetailScreen({ route, navigation }) {
             if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
             if (!user) return;
             setUserId(user.uid);
-            firestoreUnsub = onSnapshot(collection(firestore, 'users', user.uid, 'scheduleTasks'), snapshot => {
-                const dayTasks = [];
-                snapshot.forEach(docSnap => {
-                    if (docSnap.data().day === day) {
-                        dayTasks.push({ id: docSnap.id, ...docSnap.data() });
-                    }
-                });
-                dayTasks.sort((a, b) => a.startTime.localeCompare(b.startTime));
-                setTasks(dayTasks);
-            });
+            firestoreUnsub = onSnapshot(
+                collection(firestore, 'users', user.uid, 'scheduleTasks'),
+                snapshot => {
+                    const dayTasks = [];
+                    snapshot.forEach(docSnap => {
+                        if (docSnap.data().day === day) {
+                            dayTasks.push({ id: docSnap.id, ...docSnap.data() });
+                        }
+                    });
+                    dayTasks.sort((a, b) => a.startTime.localeCompare(b.startTime));
+                    setTasks(dayTasks);
+                    setLoading(false);
+                    setError(null);
+                },
+                () => {
+                    setLoading(false);
+                    setError('Failed to load tasks. Pull down to retry.');
+                }
+            );
         });
         return () => { authUnsub(); if (firestoreUnsub) firestoreUnsub(); };
     }, [day]);
@@ -224,32 +235,42 @@ export default function DayDetailScreen({ route, navigation }) {
                 <View style={{ width: 36 }} />
             </View>
 
-            <FlatList
-                data={tasks}
-                keyExtractor={item => item.id}
-                contentContainerStyle={tasks.length === 0 ? styles.emptyContainer : { paddingBottom: 90 }}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
-                ListEmptyComponent={
-                    <Text style={[styles.emptyText, { color: colors.subtext }]}>No tasks for {DAY_FULL[day]}</Text>
-                }
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        onLongPress={() => handleLongPress(item)}
-                        delayLongPress={400}
-                        activeOpacity={1}
-                        style={[styles.taskRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}
-                    >
-                        <View style={[styles.timeBar, { backgroundColor: colors.primary }]} />
-                        <View style={styles.taskInfo}>
-                            <Text style={[styles.taskTitle, { color: colors.text }]}>{item.title}</Text>
-                            <Text style={[styles.taskTime, { color: colors.subtext }]}>{item.startTime} – {item.endTime}</Text>
-                        </View>
-                        <TouchableOpacity onPress={() => handleDelete(item)} style={styles.deleteBtn}>
-                            <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+            {loading ? (
+                <View style={styles.centerState}>
+                    <ActivityIndicator size="large" color={colors.primary} />
+                </View>
+            ) : error ? (
+                <View style={styles.centerState}>
+                    <Text style={[styles.emptyText, { color: colors.subtext }]}>{error}</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={tasks}
+                    keyExtractor={item => item.id}
+                    contentContainerStyle={tasks.length === 0 ? styles.emptyContainer : { paddingBottom: 90 }}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />}
+                    ListEmptyComponent={
+                        <Text style={[styles.emptyText, { color: colors.subtext }]}>No tasks for {DAY_FULL[day]}</Text>
+                    }
+                    renderItem={({ item }) => (
+                        <TouchableOpacity
+                            onLongPress={() => handleLongPress(item)}
+                            delayLongPress={400}
+                            activeOpacity={1}
+                            style={[styles.taskRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}
+                        >
+                            <View style={[styles.timeBar, { backgroundColor: colors.primary }]} />
+                            <View style={styles.taskInfo}>
+                                <Text style={[styles.taskTitle, { color: colors.text }]}>{item.title}</Text>
+                                <Text style={[styles.taskTime, { color: colors.subtext }]}>{item.startTime} – {item.endTime}</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => handleDelete(item)} style={styles.deleteBtn}>
+                                <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                            </TouchableOpacity>
                         </TouchableOpacity>
-                    </TouchableOpacity>
-                )}
-            />
+                    )}
+                />
+            )}
 
             <TouchableOpacity
                 style={[styles.fab, { backgroundColor: colors.primary }]}
@@ -358,6 +379,7 @@ const styles = StyleSheet.create({
     },
     backBtn: { padding: 4 },
     headerTitle: { fontSize: 18, fontWeight: 'bold' },
+    centerState: { flex: 1, alignItems: 'center', justifyContent: 'center' },
     emptyContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 80 },
     emptyText: { fontSize: 16 },
     taskRow: {

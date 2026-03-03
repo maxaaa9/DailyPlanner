@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect, useCallback } from 'react';
 import { collection, onSnapshot, getDocsFromServer } from 'firebase/firestore';
@@ -16,6 +16,8 @@ export default function DayListScreen({ navigation }) {
     const { colors } = useTheme();
     const [taskCounts, setTaskCounts] = useState({});
     const [refreshing, setRefreshing] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
 
     const onRefresh = useCallback(async () => {
@@ -40,20 +42,45 @@ export default function DayListScreen({ navigation }) {
             if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
             if (!user) return;
             setCurrentUserId(user.uid);
-            firestoreUnsub = onSnapshot(collection(firestore, 'users', user.uid, 'scheduleTasks'), snapshot => {
-                const counts = {};
-                snapshot.forEach(doc => {
-                    const day = doc.data().day;
-                    counts[day] = (counts[day] || 0) + 1;
-                });
-                setTaskCounts(counts);
-            });
+            firestoreUnsub = onSnapshot(
+                collection(firestore, 'users', user.uid, 'scheduleTasks'),
+                snapshot => {
+                    const counts = {};
+                    snapshot.forEach(doc => {
+                        const day = doc.data().day;
+                        counts[day] = (counts[day] || 0) + 1;
+                    });
+                    setTaskCounts(counts);
+                    setLoading(false);
+                    setError(null);
+                },
+                () => {
+                    setLoading(false);
+                    setError('Failed to load schedule. Pull down to retry.');
+                }
+            );
         });
         return () => { authUnsub(); if (firestoreUnsub) firestoreUnsub(); };
     }, []);
 
     const jsDay = new Date().getDay();
     const todayName = DAYS[jsDay === 0 ? 6 : jsDay - 1];
+
+    if (loading) {
+        return (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+                <Text style={{ color: colors.subtext, fontSize: 15 }}>{error}</Text>
+            </View>
+        );
+    }
 
     return (
         <FlatList
