@@ -30,177 +30,402 @@ Setup Requirements
         - If you have an issues with the SDK location, open terminal as administrator and run -> [System.Environment]::SetEnvironmentVariable("ANDROID_HOME",                      "C:\Users\INSERT_YOU_USER_HERE\AppData\Local\Android\Sdk", "User").
         - If you have fatal error, you must insert the API_GOOGLE_KEY for locations api at \android\app\src\main\AndroidManifest.xml set android:value="AIzaSyCfhhfp8XnfpaR7xlflV9iHrkKVpP8EJTI"/>. If you cant set Android manifest, replace it with the ready one from folder scripts!
 
-Functional Guide
+📅 DailyPlanner – Functional Guide
+📌 Project Overview
 
-1. Project Overview
     Application Name: DailyPlanner
-    
-    Application Category / Topic: Productivity
+    Category: Productivity
     
     Main Purpose:
-    DailyPlanner is a personal productivity app that allows users to schedule recurring weekly tasks organised by day. The app gives users a daily overview of their schedule, tracks task completion, and sends push notifications as reminders. It also shows nearby fitness locations on a map to encourage healthy habits alongside structured planning.
+        DailyPlanner is a personal productivity application that allows users to schedule recurring weekly tasks organised by day. The app provides a daily overview, tracks task completion, sends push notifications as reminders, and displays nearby fitness locations on a live map to promote healthy habits alongside structured planning.
 
-2. User Access & Permissions
-    Guest (Not Authenticated)
-    Only the AuthScreen is accessible.
-    No data, screens, or features are available without signing in.
-    Available actions: Sign In, Register (toggle between both forms on the same screen).
-    Authenticated User
-    Main sections / tabs:
-    
-    Home – Daily dashboard: task stats (total, completed, free time), current location label, and a live map of nearby gyms.
-    Tasks – Today's scheduled tasks with a tick-off completion mechanism and notification integration.
-    Scheduler – Weekly schedule management.
-    Detail screens:
-    
-    DayDetailScreen – Lists all tasks for a selected weekday; accessible from the Scheduler tab.
-    Create / Edit / Delete actions:
-    
-    Create a new task for any weekday (via FAB in DayDetailScreen).
-    Edit an existing task via long-press (opens pre-filled modal).
-    Delete a task via the trash icon (requires biometric confirmation if available).
-    Change profile picture via camera.
-    Toggle dark/light theme or reset to system default.
+🔐 User Access & Permissions
+👤 Guest (Not Authenticated)
 
-3. Authentication & Session Handling
+    Only AuthScreen is accessible.
+    No data or app features are available without signing in.
+    
+    Available actions:
+    
+    Sign In
+    
+    Register (toggle between forms on the same screen)
+
+👤 Authenticated User
+📂 Main Tabs
+
+    Home – Daily dashboard with:
+    
+    Task statistics (total, completed, free time)
+    
+    Current location label
+    
+    Live map of nearby gyms
+    
+    Tasks – Today’s scheduled tasks:
+    
+    Tick-off completion mechanism
+    
+    Notification integration
+    
+    Scheduler – Weekly schedule management
+
+📄 Detail Screens
+    
+    DayDetailScreen – Lists all tasks for a selected weekday
+    (Accessible from Scheduler tab)
+    
+    ✏️ Create / Edit / Delete Actions
+    
+    Create new task (FAB button)
+    
+    Edit task (long-press → pre-filled modal)
+    
+    Delete task (trash icon → biometric confirmation if available)
+    
+    Change profile picture (camera access)
+    
+    Toggle Dark / Light / System theme
+    
+    Sign out
+
+🔑 Authentication & Session Handling
     Authentication Flow
-    App starts → App.js renders a loading spinner while Firebase's onAuthStateChanged listener initialises.
-    Auth status check → Firebase SDK automatically checks for a persisted token. setLoading(false) is called once the result is known.
-    No active session → AuthScreen is rendered. The user can switch between Sign In and Register using a toggle link.
-    Sign In: validates email format, calls signIn() (Firebase signInWithEmailAndPassword). On success, onAuthSuccess() sets signedIn = true and the main app renders.
-    Register: validates email format + password strength rules, calls createAccount() (Firebase createUserWithEmailAndPassword). On success, transitions immediately to the main app.
-    Successful login/registration → signedIn state becomes true, the NavigationContainer with the three-tab layout is rendered.
-    Logout → User taps profile icon → "Sign Out" → confirmation alert → signOut() clears the Firebase session → onAuthStateChanged fires → signedIn becomes false → AuthScreen is shown again.
-    Session Persistence
-    Firebase Auth SDK internally persists the user token using AsyncStorage (React Native default persistence).
-    On app restart, onAuthStateChanged fires automatically with the stored user, bypassing the login screen without any manual re-login.
+    
+    App starts → App.js renders loading spinner
+    
+    Firebase onAuthStateChanged initializes
+    
+    Firebase checks persisted token
+    
+    setLoading(false) called
+    
+    If no session → AuthScreen shown
+    
+    If login/register successful → main app renders
+    
+    Sign In
+    
+    Email validation
+    
+    signInWithEmailAndPassword
+    
+    Register
+    
+    Email + password strength validation
+    
+    createUserWithEmailAndPassword
+    
+    Logout
+    
+    Profile → Sign Out
+    
+    Confirmation alert
+    
+    Firebase session cleared
+    
+    onAuthStateChanged triggers
+    
+    AuthScreen displayed
 
-4. Navigation Structure
+🔁 Session Persistence
+
+    Firebase Auth persists user token using AsyncStorage.
+    On app restart, session is automatically restored.
+
+🧭 Navigation Structure
     Root Navigation Logic
-    Navigation is split at the state level in App.js, not via a navigator.
-    If signedIn === false → renders <AuthScreen /> (no NavigationContainer).
-    If signedIn === true → renders a <NavigationContainer> with the full tab layout.
-    Main Navigation
-    Type: MaterialTopTabNavigator (tabs rendered at the bottom of the screen, tabBarPosition="bottom").
+    
+    Navigation is state-based in App.js:
+    
+    signedIn === false → AuthScreen
+    signedIn === true  → NavigationContainer (Tabs)
+    Main Navigation Type
+    
+    MaterialTopTabNavigator (rendered at bottom)
+    
+    Tabs:
+    
+    Home
+    
+    Tasks
+    
+    Scheduler
+    
+    Features:
+    
+    Icons + labels
+    
+    Custom header with tab name + profile menu
+    
+    Swipe navigation enabled
 
-    3 tabs: Home, Tasks, Scheduler — each with an icon and label.
-    A custom header bar above the tab navigator shows the current tab name and the profile menu button.
-    Swipe navigation between tabs is enabled.
-    Nested Navigation
-    Yes. The Scheduler tab contains a nested NativeStackNavigator:
-    DayListScreen (default screen) — list of 7 weekdays with task counts.
-    DayDetailScreen — tasks for the selected day, full CRUD, custom back-button header.
+🔄 Nested Navigation
 
-5. List → Details Flow
-    List / Overview Screen — DayListScreen
-    Displays the 7 days of the week (Mon–Sun) as a vertical list using FlatList.
-    Each row shows: short day name (highlighted if today), full day name, and a badge with the task count for that day.
-    Data is fetched from Firestore in real-time via onSnapshot. Pull-to-refresh forces a server fetch via getDocsFromServer.
-    The user taps a row to navigate to the detail screen.
-    Details Screen — DayDetailScreen
-    Navigation is triggered via navigation.navigate('DayDetail', { day: item }) from DayListScreen.
-    The day string (e.g. "Mon") is received via route.params.day and used to filter tasks from Firestore.
-    Displays tasks for that day sorted by start time; supports add, edit, and delete in the same screen.
+    Scheduler tab contains a NativeStackNavigator:
     
-6. Data Source & Backend
-    Backend Type: Real backend — Firebase
+    DayListScreen (default)
     
-    Firebase Authentication for email/password sign-in and registration.
-    Firebase Firestore for storing all task and profile data.
-    Collection path for tasks: users/{uid}/scheduleTasks
-    Document path for profile: users/{uid}
-   
-8. Data Operations (CRUD)
-    Read (GET)
-    Tasks are fetched from Firestore using onSnapshot (real-time listener) in HomeScreen, TasksScreen, DayListScreen, and DayDetailScreen.
-    Displayed as sorted lists (startTime ascending) or aggregated as counts per day.
-    Pull-to-refresh in DayListScreen and DayDetailScreen uses getDocsFromServer to bypass the cache.
-    Profile picture is read via onSnapshot on the user document in ProfileMenu.
-    Create (POST)
-    In DayDetailScreen, tapping the FAB (floating + button) opens a modal form.
-    On submit, addDoc writes a new document to users/{uid}/scheduleTasks containing { day, title, startTime, endTime, notificationId, notificationsEnabled }.
-    If notifications are enabled, a notification is scheduled before the document is saved and its ID is stored in the document.
-    Update / Delete (Mutation)
-    Update: Long-pressing a task row opens the same modal pre-filled with the task's data. On save, updateDoc patches the Firestore document. The existing notification is cancelled and a new one is optionally scheduled.
-    Delete: The trash icon triggers biometric authentication (if hardware and enrollment are available). On success, an Alert confirmation is shown. Confirmed deletion calls deleteDoc, cancels all associated notifications, and removes the task IDs from AsyncStorage.
-    UI update: Both operations are reflected immediately due to the active onSnapshot listener, which re-renders the list automatically.
-   
-10. Forms & Validation
-    Forms Used
-    AuthScreen — Sign In / Register form
-    DayDetailScreen modal — Add / Edit Task form
-    Validation Rules
-    Email (AuthScreen):
+    DayDetailScreen
+
+📋 List → Details Flow
+📅 DayListScreen
+
+    Displays 7 weekdays (Mon–Sun)
     
-    Must match the pattern /^[^\s@]+@[^\s@]+\.[^\s@]+$/.
-    Error: "Please enter a valid email address."
-    Password (AuthScreen, registration only — multiple rules):
+    Shows:
     
-    Minimum 8 characters → "Password must be at least 8 characters."
-    Must contain at least one uppercase letter → "Password must contain at least one uppercase letter."
-    Must contain at least one lowercase letter → "Password must contain at least one lowercase letter."
-    Must contain at least one number → "Password must contain at least one number."
-    Task Title (DayDetailScreen):
+    Short day name
     
-    Must not be empty (.trim() check).
-    Error: "Please enter a task title."
-    Start Time / End Time (DayDetailScreen):
+    Full day name
     
-    Must match the format HH:MM via regex /^([01]\d|2[0-3]):([0-5]\d)$/.
-    End time must be strictly after start time (startTime >= endTime check).
-    Errors: "Please select a start/end time." / "End time must be after start time."
-   
-11. Native Device Features
-    Used Native Features
+    Task count badge
+    
+    Real-time Firestore listener (onSnapshot)
+    
+    Pull-to-refresh via getDocsFromServer
+    
+    🗂 DayDetailScreen
+    
+    Receives selected day via route.params
+    
+    Filters tasks by weekday
+    
+    Sorted by startTime
+    
+    Full CRUD functionality
+    
+    ☁️ Backend & Data Source
+    Backend Type
+    
+    Firebase
+    
+    Firebase Authentication
+    
+    Firebase Firestore
+    
+    Firestore Paths
+    Tasks: users/{uid}/scheduleTasks
+    Profile: users/{uid}
+
+🔄 CRUD Operations
+📥 Read
+
+    onSnapshot (real-time listener)
+    
+    Sorted lists or aggregated counts
+    
+    Pull-to-refresh bypasses cache
+    
+    Profile picture via onSnapshot
+    
+    ➕ Create
+    
+    addDoc()
+    
+    Saves:
+    
+    day
+    
+    title
+    
+    startTime
+    
+    endTime
+    
+    notificationId
+    
+    notificationsEnabled
+    
+    Notification scheduled before saving.
+
+🔁 Update
+
+    updateDoc()
+    
+    Cancels previous notification
+    
+    Schedules new one if enabled
+
+❌ Delete
+
+    Biometric authentication (if available)
+    
+    deleteDoc()
+    
+    Cancels notifications
+    
+    Removes task IDs from AsyncStorage
+    
+    UI auto-updates via onSnapshot.
+
+📝 Forms & Validation
+    AuthScreen Validation
+    Email
+    
+    Regex:
+    
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    
+    Error:
+    Please enter a valid email address.
+    
+    Password Rules
+    
+    Min 8 characters
+    
+    1 uppercase
+    
+    1 lowercase
+    
+    1 number
+    
+    Task Validation
+    Title
+    
+    Cannot be empty
+    
+    Time Format
+    
+    Regex:
+    
+    ^([01]\d|2[0-3]):([0-5]\d)$
+    
+    End time must be after start time
+
+📱 Native Device Features
+
     Feature	Library
     Location & Maps	expo-location, react-native-maps
-    Camera / Image Picker	expo-image-picker
+    Camera	expo-image-picker
     Biometrics	expo-local-authentication
-    Push Notifications	expo-notifications
-    Usage Descriptions
-    Location & Maps (HomeScreen):
-    On load, the app requests foreground location permission. If granted, it retrieves the current GPS coordinates and performs reverse geocoding to display a readable address label. The coordinates are then used to query the Google Places API for gyms within 2 km. All results are displayed as map markers on a MapView, with the nearest gym highlighted in green and shown in an info card above the map.
+    Notifications	expo-notifications
     
-    Camera / Image Picker (ProfileMenu):
-    The user accesses the camera by tapping the profile avatar in the header and selecting "Change Profile Picture". expo-image-picker opens the native camera (launchCameraAsync), allows 1:1 cropping, and encodes the result as a base64 JPEG string. The image is then saved as a data URI to the Firestore user document and displayed in the profile circle.
+
+📍 Location & Maps (HomeScreen)
+
+    Requests foreground permission
     
-    Biometrics (DayDetailScreen):
-    When a user taps the delete icon on a task, the app checks for biometric hardware (hasHardwareAsync) and enrolled biometrics (isEnrolledAsync). If both are present, authenticateAsync is called to prompt the user with Face ID / fingerprint before the delete alert is shown. If biometrics are unavailable, the delete proceeds directly to the confirmation alert.
+    Reverse geocoding for readable address
     
-    Push Notifications (TasksScreen, DayDetailScreen):
-    When tasks are created or updated, expo-notifications schedules local notifications. Two types are used: a "task starting" notification at the task's start time, and "active window" reminder notifications during the task's duration. When a task is marked as done or deleted, its pending notifications are cancelled by ID. Notification IDs are persisted in AsyncStorage keyed by date so they survive app restarts.
-
-12. Typical User Flow
-    First launch: User opens the app → loading spinner appears while Firebase checks for an existing session → no session found → AuthScreen is shown with a wallpaper image and Sign In form.
-    Registration: User taps "Don't have an account? Sign up." → switches to Register mode → enters email and a password meeting all strength rules → taps Register → account is created in Firebase → transitions directly to the main app.
-    Home tab: User sees a greeting with today's day name, three stat cards (tasks today, completed count, free time between tasks), their current location label, and a map with nearby gym markers. Tapping a marker updates the info card with the gym's name, address, and rating.
-    Scheduler tab → Add task: User taps the Scheduler tab → sees the 7-day list → taps "Tuesday" → arrives at DayDetailScreen → taps the blue FAB → fills in task title "Morning Workout", picks 07:00 start and 08:00 end via the time picker → enables notifications → taps "Add" → task appears immediately in the list, a notification is scheduled.
-    Tasks tab: User switches to the Tasks tab → sees today's scheduled tasks in chronological order → taps the circle icon next to a completed task → it is marked done (greyed out) → its pending notifications are cancelled and completion is saved to AsyncStorage.
-    Edit task: User returns to Scheduler → long-presses a task → modal pre-fills with existing data → edits the title → taps "Update" → Firestore is updated, old notification is replaced.
-    Delete task: User taps the trash icon → Face ID prompt appears → authenticates → confirmation alert → taps "Delete" → task removed from Firestore and list, notifications cancelled.
-    Profile & theme: User taps the profile circle in the header → selects "Theme" → toggles dark mode on → UI updates immediately across all screens → selects "Use System Default" to reset.
-    Sign out: User taps profile circle → selects "Sign Out" → confirmation alert → confirms → Firebase session cleared → AuthScreen shown.
-
-13. Error & Edge Case Handling
-    Authentication errors:
-
-    Invalid email format: inline red error banner (#F44336) shown below the email field with the message. The banner auto-dismisses after 3 seconds via a setTimeout ref.
-    Wrong credentials on sign in: "Wrong credentials, please try again." shown in the same error banner.
-    Email already in use on register: "This email is already in use, please try another one."
-    Password rule violations: specific per-rule message is shown before any network call is made.
-    Network or data errors:
-
-    Firestore onSnapshot failure in DayListScreen and DayDetailScreen: error state is set and a message is displayed ("Failed to load schedule / tasks. Pull down to retry."). The user can trigger a manual getDocsFromServer refresh via pull-to-refresh.
-    Location permission denied: locationLabel is set to "Location permission denied" and the map placeholder is shown instead of the live map.
-    Google Places API failure: caught silently, fitnessPlaces remains an empty array and no markers are rendered.
-    Camera permission denied: Alert.alert('Permission denied', ...) informs the user that camera access is required.
-    Profile picture save failure: Alert.alert('Save failed', e?.message) shows the Firebase error message.
-    Biometric auth failure / cancelled: delete flow is aborted silently with no UI change.
-    Empty or missing data states:
+    Google Places API (gyms within 2km)
     
-    TasksScreen with no tasks today: centred text "No tasks scheduled for [Day]" shown via ListEmptyComponent.
-    DayDetailScreen with no tasks for the selected day: centred text "No tasks for [Day]".
-    DayListScreen shows zero-task days with no badge (badge only renders when taskCounts[day] > 0).
-    HomeScreen with no tasks: free-time card shows "—" and sub-label "no tasks today".
-    Profile picture not set: profile circle shows a default person icon instead of an image.
-    doneTasks in AsyncStorage from a previous date: automatically discarded by comparing the stored date string to today's date string before restoring state.
+    Nearest gym highlighted
+    
+    📷 Camera (ProfileMenu)
+    
+    Opens native camera
+    
+    1:1 cropping
+    
+    Saves base64 image to Firestore
+
+🔐 Biometrics (Delete Task)
+
+    Checks hardware + enrollment
+    
+    Face ID / Fingerprint prompt
+    
+    If unavailable → standard confirmation
+
+🔔 Push Notifications
+
+    Task start notification
+    
+    Active window reminders
+    
+    Cancelled on completion or delete
+    
+    IDs persisted in AsyncStorage
+
+🚀 Typical User Flow
+    
+    First Launch
+    
+    Loading spinner
+    
+    No session → AuthScreen
+    
+    Registration
+    
+    Switch to Register
+    
+    Enter valid email + strong password
+    
+    Auto-login after success
+    
+    Home Tab
+    
+    Greeting + today’s stats
+    
+    Location label
+    
+    Gym map markers
+    
+    Add Task
+    
+    Scheduler → Select day → FAB →
+    Add title + time → Enable notifications → Save
+    
+    Complete Task
+    
+    Tasks tab → Tap circle →
+    Marked done → Notifications cancelled
+    
+    Edit Task
+    
+    Long press → Modify → Update
+    
+    Delete Task
+    
+    Trash → Biometric → Confirm → Removed
+    
+    Profile & Theme
+    
+    Profile → Toggle dark/light/system
+    
+    Sign Out
+    
+    Profile → Sign Out → Confirm → AuthScreen
+
+⚠️ Error & Edge Case Handling
+
+    Authentication Errors
+    
+    Invalid email
+    
+    Wrong credentials
+    
+    Email already in use
+    
+    Password rule violations
+    
+    Red error banner (#F44336) auto-dismisses after 3 seconds.
+    
+    Data / Network Errors
+    
+    Firestore failure → error message + pull-to-refresh
+    
+    Location denied → placeholder shown
+    
+    Google Places failure → empty markers
+    
+    Camera denied → alert
+    
+    Biometric failure → silent abort
+    
+    Empty States
+    
+    No tasks today → centered message
+    
+    No tasks for selected day → centered message
+    
+    Zero-task days → no badge
+    
+    No profile picture → default icon
+    
+    Old AsyncStorage task completion → discarded automatically
+
+🏁 Conclusion
+
+    DailyPlanner combines structured weekly scheduling, real-time task tracking, push notifications, biometric security, and location-based fitness suggestions into a fully functional productivity application powered by Firebase.
